@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'question.dart';
+import 'quizz_brain.dart';
 
 class QuizzerApp extends StatefulWidget {
   const QuizzerApp({super.key});
@@ -8,15 +11,13 @@ class QuizzerApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<QuizzerApp> {
-  var questionNumber = 1;
 
   List<Icon> iconLists = [];
-  List<String> questionLists = ['La capitale de la France est Marseille','La casa de Papel a mangé tout le miel'];
-  List<bool> answerLists = [false,true];
+  QuizzBrain quizz1 = QuizzBrain([Question("Fréjus est la capitale de la France", false), Question("La Casa de Papel a mangé tout le miel", true)]);
 
   void handleOnTapButton(userAnswer) => setState(() {
-    if (iconLists.length < questionLists.length) {
-      if (userAnswer == answerLists[questionNumber - 1 ]) {
+    if (iconLists.length < quizz1.questionListLength()) {
+      if (userAnswer == quizz1.getAnswer(quizz1.getQuestionNumber() - 1)) {
         iconLists.add(const Icon(
           IconData(0xe156, fontFamily: 'MaterialIcons'),
           color: Colors.green,
@@ -29,10 +30,30 @@ class _MainAppState extends State<QuizzerApp> {
         ));
         
       }
+
+      quizz1.nextQuestion();
+    } else {
+      Alert(
+        context: context,
+        title: "C'est terminé",
+        desc: "Vous êtes arrivé au bout de ce quizz, pour recommencer, cliquer sur le bouton ! :) ",
+        buttons: [
+        DialogButton(
+          
+          onPressed: () => {setState(() {
+              iconLists.clear();
+            quizz1.restartQuizz();
+            Navigator.pop(context);
+            })},
+          width: 150,
+          child: const Text(
+            "Recommencer",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        )
+      ],
+      ).show();
     }
-    if (questionNumber < questionLists.length) {
-      questionNumber = questionNumber + 1;
-    }    
   });
 
   @override
@@ -45,7 +66,7 @@ class _MainAppState extends State<QuizzerApp> {
             padding: const EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questionLists[questionNumber - 1],
+                quizz1.getQuestionText(quizz1.getQuestionNumber() - 1),
                 style: const TextStyle(color: Colors.white),
               ),
             ),
